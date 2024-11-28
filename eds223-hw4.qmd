@@ -16,65 +16,139 @@ library(tmap)
 ```
 
 
-## Import Data
+## Prepare Data
 
+Load West coast shapefile and bathymetry raster.
 ```{r}
-WC_EEZ <- read_sf(here("data", "wc_regions_clean.shp"))
+WC_EEZ <- sf::read_sf(here("data", "wc_regions_clean.shp"))
 
-bath <- read_sf(here("data", "wc_regions_clean.shp"))
+bath <- terra::rast(here("data", "depth.tif"))
 ```
+
+Load Rasters and stack.
 
 ```{r}
 SST_files <- list.files(
   here("data"), pattern = "average", 
   full.names = TRUE)
 
-create_stack <- function(i){
-  stack_layer <- rast(SST_files[i])
-  return(stack_layer)
-}
-
-SST_stack <- c(create_stack(1), 
-              create_stack(2), 
-              create_stack(3), 
-              create_stack(4), 
-              create_stack(5))
-
-names(SST_stack) <- c("2008", 
-                    "2009", 
-                    "2010", 
-                    "2011", 
-                    "2012")
-
+SST_stack <- terra::rast(SST_files)
+names(SST_stack) <- c("2008", "2009", "2010", "2011", "2012")
 ```
-
 
 ```{r}
 #| code-fold: true
 #| code-summary: "Check if CRS of each dataset are equal, update if not"
 
-if(st_crs(WC_EEZ) == st_crs(bath)) {
+if(sf::st_crs(WC_EEZ) == sf::st_crs(4326)) {
   print("Coordinate reference systems match")
 } else{
   warning("Updating coordinate reference systems to match")
   # transform data to match
-  WC_EEZ <- st_transform(WC_EEZ, st_crs(bath))
+  WC_EEZ <- sf::st_transform(WC_EEZ, st_crs(4326))
 }
+
+if(terra::crs(bath) == terra::crs("EPSG:4326")) {
+  print("Coordinate reference systems match")
+} else{
+  warning("Updating coordinate reference systems to match")
+  # transform data to match
+  bath <- project(bath, crs("EPSG:4326"))
+}
+
+if(terra::crs(SST_stack) == terra::crs("EPSG:4326")) {
+  print("Coordinate reference systems match")
+} else{
+  warning("Updating coordinate reference systems to match")
+  # transform data to match
+  SST_stack <- terra::project(SST_stack, crs("EPSG:4326"))
+}
+```
+
+
+## Process data
+
+###Next, we need to process the SST and depth data so that they can be combined. In this case the SST and depth data have slightly different resolutions, extents, and positions.
+
+Find the mean SST from 2008-2012 (e.g. create single raster of average SST)
+```{r}
+SST_mean_K <- terra::mean(SST_stack)
+```
+
+convert average SST from Kelvin to Celsius
+hint: subtract by 273.15
+
+```{r}
+SST_mean_C <- SST_mean_K - 273.15
+```
+
+crop depth raster to match the extent of the SST raster
+
+```{r}
+bath <- terra::crop(bath, SST_mean_C)
+```
+
+note: the resolutions of the SST and depth data do not match
+resample the depth data to match the resolution of the SST data using the nearest neighbor approach
+
+```{r}
+bath <- terra::resample(bath, SST_mean_C, "near")
+```
+
+
+check that the depth and SST match in resolution, extent, and coordinate reference system
+hint: can the rasters be stacked?
+
+```{r}
+if(all(terra::res(bath) == terra::res(SST_mean_C))) {
+  if(terra::crs(bath) == terra::crs(SST_mean_C)) {
+    if(terra::ext(bath) == terra::ext(SST_mean_C)){
+      print("All match")
+    }else{
+      stop("extenet does not match")
+    }
+  }else{
+    stop("CRS does not match")
+  }
+}else{
+  stop("Resolution does not match")
+}
+```
+
+```{r}
+SST_bath_test <- terra::rast(c(SST_mean_C, bath))
+```
+
+## Find suitable locations
+
+reclassify SST and depth data into locations that are suitable for oysters
+hint: set suitable values to 1 and unsuitable values to 0
+
+sea surface temperature: 11-30°C
+depth: 0-70 meters below sea level
+
+```{r}
+# check values before rcl
+summary(SST_mean_C)
+summary(bath)
 ```
 
 
 ```{r}
-#| code-fold: true
-#| code-summary: "Check if CRS of each dataset are equal, update if not"
+# reclassify erroneous values as NA
+SST_rcl <- matrix(c(-Inf, 11, 0,
+                 11, 30, 1,
+                30, Inf, 0), ncol = 3, byrow = TRUE)
 
-if(crs(SST_stack) == st_crs(bath)$wkt) {
-  print("Coordinate reference systems match")
-} else{
-  warning("Updating coordinate reference systems to match")
-  # transform data to match
-  crs(SST_stack) <- st_crs(bath)$wkt
-}
+bath_rcl <- matrix(c(-Inf, 11, 0,
+                 0, 70, 1,
+                70, Inf, 0), ncol = 3, byrow = TRUE)
+
+SST_mean_C <- classify(SST_mean_C, rcl = SST_rcl)
+bath <- classify(bath, rcl = bath_rcl)
+
+# check values are 0 - 100
+summary(SST_mean_C)
+summary(bath)
 ```
 
-
-## Prepare Data
