@@ -387,4 +387,20 @@ suitable_location(min_SST=5, max_SST=27,
 
 ## Conclusion
 
-To create a reproducible workflow, we first created one that works for a single species. We then found variables necessary to replace when creating a map for each different species. With the variables replaced, our function was created. Now we can insert our arguments to create a map of any species that we have the temperature and depth range of. 
+To create a reproducible workflow, we first created one that works for a single species. We then found variables necessary to replace when creating a map for each different species. With the variables replaced, our function was created. Now we can insert our arguments to create a map of any species that we have the temperature and depth range of. This function helps scientists and policymakers identify optimal West Coast aquaculture sites, supporting efforts to ease pressure on terrestrial food systems amid climate and land-use challenges.
+
+## Citations
+
+```{r}
+#| code-fold: true
+#| code-summary: "Citations"
+
+tribble(
+  ~Data, ~Citation, ~Link,
+  "Sea Surface Temperature Data", "NOAA Coral Reef Watch. 2019, updated daily. NOAA Coral Reef Watch Version 3.1 Daily 5km Satellite Regional Virtual Station Time Series Data. College Park, Maryland, USA: NOAA Coral Reef Watch. Data set accessed 2024-11-20 at https://coralreefwatch.noaa.gov/product/vs/data.php.", "[NOAA Coral Reef Watch](https://coralreefwatch.noaa.gov/product/5km/index_5km_ssta.php)",
+  "Bathymetry Data", "GEBCO Compilation Group (2022) GEBCO_2022 Grid (doi:10.5285/e0f0bb80-ab44-2739-e053-6c86abc0289c)", "[GEBCO](https://www.gebco.net/data_and_products/gridded_bathymetry_data/#area)",
+  "Exclusive Economic Zones", "Flanders Marine Institute (2024): MarineRegions.org. Available online at www.marineregions.org. Consulted on 2024-11-30.", "[Marine Regions](https://www.marineregions.org/eez.php)",
+  "Sea Life Base Aquaculture Data", "Palomares, M.L.D. and D. Pauly. Editors. 2024. SeaLifeBase. World Wide Web electronic publication. www.sealifebase.org, version (08/2024).", "[Sea Life Base](https://www.sealifebase.ca/search.php)"
+) %>% 
+  kable()
+```
