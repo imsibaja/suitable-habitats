@@ -8,11 +8,14 @@ editor_options:
 ---
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Load packages"
 library(terra)
 library(sf)
 library(tidyverse)
 library(here)
 library(tmap)
+library(kableExtra)
 ```
 
 
@@ -136,25 +139,25 @@ summary(bath)
 
 ```{r}
 # reclassify erroneous values as NA
-SST_rcl <- matrix(c(-Inf, 11, 0,
+SST_rcl <- matrix(c(-Inf, 11, NA,
                  11, 30, 1,
-                30, Inf, 0), ncol = 3, byrow = TRUE)
+                30, Inf, NA), ncol = 3, byrow = TRUE)
 
-bath_rcl <- matrix(c(-Inf, -70, 0,
+bath_rcl <- matrix(c(-Inf, -70, NA,
                  -70, 0, 1,
-                0, Inf, 0), ncol = 3, byrow = TRUE)
+                0, Inf, NA), ncol = 3, byrow = TRUE)
 
-SST_mean_C <- classify(SST_mean_C, rcl = SST_rcl)
-bath <- classify(bath, rcl = bath_rcl)
+SST_mean_C_rcl <- classify(SST_mean_C, rcl = SST_rcl)
+bath_rcl <- classify(bath, rcl = bath_rcl)
 
-# check values are 0 - 100
-summary(SST_mean_C)
-summary(bath)
+# check values are 1 or NA
+unique(SST_mean_C_rcl)
+unique(bath_rcl)
 ```
 
 ```{r}
 # Perform the operation: Both cells equal to 1
-suitable_loc <- (SST_mean_C*bath)
+suitable_loc <- (SST_mean_C_rcl*bath_rcl)
 plot(suitable_loc)
 ```
 
@@ -164,16 +167,58 @@ We want to determine the total suitable area within each EEZ in order to rank zo
 
 select suitable cells within West Coast EEZs
 ```{r}
-EEZ_raster <- rasterize(WC_EEZ, suitable_loc, field="rgn_id")
+EEZ_raster <- terra::rasterize(WC_EEZ, suitable_loc, field="rgn_id")
 EEZ_raster <- (EEZ_raster*suitable_loc)
 plot(EEZ_raster)
 ```
 
-
 find area of grid cells
 ```{r}
-
+# Calculate the area of each cell (in square meters)
+cell_area <- terra::cellSize(EEZ_raster, unit = "km")
 ```
 
 find the total suitable area within each EEZ
 hint: it might be helpful to rasterize the EEZ
+
+```{r}
+zone_area <- terra::zonal(cell_area, EEZ_raster, fun="sum", unit="km")
+zone_area
+```
+
+```{r}
+# To map our eez area with geometry later on
+EEZ_join <- left_join(WC_EEZ, zone_area, by = "rgn_id")
+```
+
+```{r}
+kable(EEZ_join[c("rgn", "area")] %>% st_drop_geometry(), digits = 2,
+      caption = "Suitable area by exclusive economic zone", 
+      col.names = c("EEZ Region", "Area (km^2)"))
+```
+
+
+```{r}
+tmap_mode("plot")
+tm_shape(bath) +
+  tm_raster(palette = "-RdBu",
+            title = "Bathymetry\n(m above and below sea level)",
+            alpha = 0.7,
+            midpoint = 0,
+            legend.show = TRUE) +
+  tm_shape(EEZ_join, raster.downsample = TRUE) +
+  tm_polygons(col = "area",
+              palette = "Greens",
+              alpha = 0.7,
+              title = expression("Suitable habitat area (km"^2*")")) +
+  tm_text("rgn", size = 0.4) +
+  tm_compass(size = 2,
+             position = c("left", "bottom")) +
+  tm_scale_bar(position = c("left", "bottom")) +
+  tm_layout(legend.outside = TRUE,
+            frame = FALSE,
+            main.title = "Oyster Suitable Habitat in\nWest Coast Exclusive Economic Zones",
+            main.title.size = 1.35,
+            main.title.position = c("center", "top"))
+```
+
