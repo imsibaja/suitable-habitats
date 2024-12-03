@@ -215,7 +215,7 @@ tm_shape(suitable_loc) +
              position = c("left", "bottom")) +
   tm_scale_bar(position = c("left", "bottom")) +
   tm_layout(legend.show = FALSE,
-            main.title = "Suitable Locations of Oyster Habitat",
+            main.title = "Suitable Locations\nof Oyster Habitat",
             main.title.size = 1.35,
             main.title.position = c("center", "top"))
 ```
@@ -273,6 +273,8 @@ us_states <- st_intersection(us_states, EEZ_raster_bbox)
 ```
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Plot the data"
 tm_shape(bath) +
   tm_raster(palette = "-RdBu",
             title = "Bathymetry\n(m above and below sea level)",
