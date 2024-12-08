@@ -1,6 +1,6 @@
 ---
-title: "Homework Assignment 4"
-subtitle: "Prioritizing potential aquaculture"
+title: "Prioritizing Potential Aquaculture"
+subtitle: "A Functional Analysis of West Coast Economic Zones"
 author: "Ian Morris-Sibaja"
 date: last-modified
 execute: 
