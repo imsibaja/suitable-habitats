@@ -28,18 +28,16 @@ This project takes a look at suitable habitats for marine aquaculture species al
 Our constants to use for our suitable growing conditions are found on the [SeaLifeBase](https://www.sealifebase.ca/search.php) interactive database.
 #### Oysters:
 Research has shown that oysters need the following conditions for optimal growth:
+- Sea surface temperature: 11-30°C
+- Depth: 0-70 meters below sea level
 
-sea surface temperature: 11-30°C
-depth: 0-70 meters below sea level
-
-Therefore we use those constants for our oyster Analysis. 
+Therefore we use those constants for our oyster analysis. 
 #### Chinese Mitten crab:
 Research has shown that Chinese Mitten crabs need the following conditions for optimal growth:
+- Sea surface temperature: 5-27°C
+- Depth: 0-25 meters below sea level
 
-sea surface temperature: 5-27°C
-depth: 0-25 meters below sea level
-
-Therefore we use those constants for our crab Analysis. 
+Therefore we use those constants for our crab analysis. 
 ### Sea Surface Temperature
 Sea surface temperature (SST) from the years 2008 to 2012 is used from [NOAA’s 5km Daily Global Satellite Sea Surface Temperature Anomaly v3.1.](https://coralreefwatch.noaa.gov/product/5km/index_5km_ssta.php)
 
