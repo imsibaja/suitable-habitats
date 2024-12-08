@@ -19,18 +19,6 @@ This project takes a look at suitable habitats for marine aquaculture species al
 │   README.md
 |   suitable-habitats.Rproj
 |   .gitignore
-│
-└───data (to be downloaded)
-|   |   depth.tif
-|   |   average_annual_sst_2008.tif
-|   |   average_annual_sst_2012.tif
-|   |   average_annual_sst_2009.tif
-|   |   average_annual_sst_2011.tif
-|   |   average_annual_sst_2010.tif
-|   |   wc_regions_clean.shp
-|   |   wc_regions_clean.dbf
-|   |   wc_regions_clean.prj
-|   |   wc_regions_clean.shx
 
 ```
 
