@@ -31,8 +31,7 @@ This project takes a look at suitable habitats for marine aquaculture species al
 |   |   wc_regions_clean.dbf
 |   |   wc_regions_clean.prj
 |   |   wc_regions_clean.shx
-|
-└───suitable-habitats_files
+
 ```
 
 ## Data
