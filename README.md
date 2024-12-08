@@ -18,7 +18,7 @@ This project takes a look at suitable habitats for marine aquaculture species al
 |   suitable-habitats.qmd
 │   README.md
 |   suitable-habitats.Rproj
-|   .gitignore
+|   .gitignore 
 
 ```
 
